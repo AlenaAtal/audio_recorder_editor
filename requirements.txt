@@ -7,10 +7,3 @@ pydub>=0.25.1
 pyaudio>=0.2.14
 noisereduce>=3.0.0
 scipy>=1.10.0
-
-# Веб-версія (Streamlit)
-streamlit>=1.28.0
-plotly>=5.15.0
-
-# Консольна версія (Replit)
-matplotlib>=3.7.0

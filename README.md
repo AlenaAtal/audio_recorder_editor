@@ -12,7 +12,13 @@
 
 ## 🚀 Швидкий запуск
 
-### Варіант 1: GitHub Codespaces (рекомендую)
+### Варіант 1: EXE файли (найпростіше)
+1. Перейдіть в [Releases](https://github.com/AlenaAtal/audio_recorder_editor/releases)
+2. Завантажте **AudioEditor_v1.0.4.exe**
+3. Встановіть ffmpeg (див. інструкції нижче)
+4. Запустіть EXE файл
+
+### Варіант 2: GitHub Codespaces
 1. Натисніть **"Code"** → **"Codespaces"** → **"Create codespace"**
 2. Встановіть залежності: `pip install -r requirements.txt`
 3. Запустіть: `python audio_recorder_editor.py`
@@ -67,6 +73,7 @@
 
 ## 🔧 Встановлення
 
+### **Для роботи з кодом:**
 ```bash
 # Клонування репозиторію
 git clone https://github.com/AlenaAtal/audio_recorder_editor.git
@@ -77,6 +84,21 @@ pip install -r requirements.txt
 
 # Запуск основної програми
 python audio_recorder_editor.py
+```
+
+### **Для роботи з EXE файлами:**
+1. **Завантажте EXE файл** з розділу [Releases](https://github.com/AlenaAtal/audio_recorder_editor/releases)
+2. **Встановіть ffmpeg** (для підтримки MP3, FLAC, OGG):
+
+#### **Windows:**
+- Завантажте з [ffmpeg.org](https://ffmpeg.org/download.html)
+- Або через [Chocolatey](https://chocolatey.org/): `choco install ffmpeg`
+- Або через [Scoop](https://scoop.sh/): `scoop install ffmpeg`
+
+#### **macOS:**
+```bash
+# Через Homebrew
+brew install ffmpeg
 ```
 
 ## 📝 Версія 1.0.4 - Зміни за сьогодні

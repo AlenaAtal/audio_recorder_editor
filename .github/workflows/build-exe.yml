@@ -29,31 +29,24 @@ jobs:
     - name: Build EXE with PyInstaller
       run: |
         pyinstaller --onefile --windowed --name "AudioEditor_v1.0.4" audio_recorder_editor.py
-        pyinstaller --onefile --name "AudioEditor_Console_v1.0.4" audio_editor_replit.py
     
     - name: Upload EXE artifacts
       uses: actions/upload-artifact@v4
       with:
         name: audio-editor-exe
-        path: |
-          dist/AudioEditor_v1.0.4.exe
-          dist/AudioEditor_Console_v1.0.4.exe
-    
+        path: dist/AudioEditor_v1.0.4.exe
+
     - name: Show EXE files info
       if: always()
       run: |
-        echo "🎉 EXE файли зібрано успішно!"
-        echo "📁 Файли знаходяться в артефактах:"
+        echo "🎉 EXE файл зібрано успішно!"
+        echo "📁 Файл знаходиться в артефактах:"
         if (Test-Path "dist/AudioEditor_v1.0.4.exe") {
           $size = (Get-Item "dist/AudioEditor_v1.0.4.exe").Length / 1MB
           echo "   📄 AudioEditor_v1.0.4.exe ($([math]::Round($size, 1)) MB)"
-        }
-        if (Test-Path "dist/AudioEditor_Console_v1.0.4.exe") {
-          $size = (Get-Item "dist/AudioEditor_Console_v1.0.4.exe").Length / 1MB
-          echo "   📄 AudioEditor_Console_v1.0.4.exe ($([math]::Round($size, 1)) MB)"
         }
         echo ""
         echo "💡 Для створення Release:"
         echo "   1. Перейдіть в 'Releases' на GitHub"
         echo "   2. Натисніть 'Create a new release'"
-        echo "   3. Завантажте EXE файли з артефактів"
+        echo "   3. Завантажте EXE файл з артефактів"
