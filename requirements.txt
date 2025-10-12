@@ -1,0 +1,16 @@
+# Аудіо Рекордер та Редактор v1.0.4 - Залежності
+# Основні пакети
+numpy>=1.24.0,<2.0.0
+PyQt5>=5.15.0
+pyqtgraph>=0.13.0
+pydub>=0.25.1
+pyaudio>=0.2.14
+noisereduce>=3.0.0
+scipy>=1.10.0
+
+# Веб-версія (Streamlit)
+streamlit>=1.28.0
+plotly>=5.15.0
+
+# Консольна версія (Replit)
+matplotlib>=3.7.0
