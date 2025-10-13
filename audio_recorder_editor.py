@@ -18,7 +18,7 @@ def trim_silence(audio, silence_thresh=-40, min_silence_len=100):
         return audio
     start_trim = nonsilent[0][0]
     end_trim = nonsilent[-1][1]
-    return [start_trim:end_trim]
+    return audio[start_trim:end_trim]
 
 class AudioRecorderEditor(QtWidgets.QWidget):
     def __init__(self):
