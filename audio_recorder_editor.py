@@ -1,7 +1,7 @@
 import sys
 import os
 import numpy as np
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt6 import QtWidgets, QtCore, QtGui
 import pyqtgraph as pg
 from pydub import AudioSegment, effects, silence
 from pydub.silence import detect_nonsilent
@@ -102,11 +102,11 @@ class AudioRecorderEditor(QtWidgets.QWidget):
             vbox = QtWidgets.QVBoxLayout()
             label = QtWidgets.QLabel(f'{freq} Гц')
             vbox.addWidget(label)
-            slider = QtWidgets.QSlider(QtCore.Qt.Vertical)
+            slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Vertical)
             slider.setRange(-12, 12)
             slider.setValue(0)
             slider.setTickInterval(1)
-            slider.setTickPosition(QtWidgets.QSlider.TicksBothSides)
+            slider.setTickPosition(QtWidgets.QSlider.TickPosition.TicksBothSides)
             slider.valueChanged.connect(self.update_eq_gains)
             vbox.addWidget(slider)
             self.eq_sliders.append(slider)
@@ -134,13 +134,100 @@ class AudioRecorderEditor(QtWidgets.QWidget):
         self.plot_widget.viewport().installEventFilter(self)
         self.plot_widget.wheelEvent = self.on_wheel_event
         self.region.sigRegionChanged.connect(self.on_region_changed)
+        
+        # Нижняя панель: выбор источников записи и воспроизведения
+        bottom_layout = QtWidgets.QHBoxLayout()
+        
+        # Выбор источника записи
+        bottom_layout.addWidget(QtWidgets.QLabel('Джерело запису:'))
+        self.input_device_combo = QtWidgets.QComboBox()
+        self.input_device_combo.setMinimumWidth(200)
+        self.populate_input_devices()
+        bottom_layout.addWidget(self.input_device_combo)
+        
+        # Выбор источника воспроизведения
+        bottom_layout.addWidget(QtWidgets.QLabel('Джерело відтворення:'))
+        self.output_device_combo = QtWidgets.QComboBox()
+        self.output_device_combo.setMinimumWidth(200)
+        self.populate_output_devices()
+        bottom_layout.addWidget(self.output_device_combo)
+        
+        # Кнопка обновления списка устройств
+        self.btn_refresh_devices = QtWidgets.QPushButton('Оновити пристрої')
+        self.btn_refresh_devices.clicked.connect(self.refresh_devices)
+        bottom_layout.addWidget(self.btn_refresh_devices)
+        
+        bottom_layout.addStretch()  # Растягиваем оставшееся пространство
+        layout.addLayout(bottom_layout)
+        
         self.setLayout(layout)
 
     def setup_shortcuts(self):
-        undo_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Z'), self)
+        undo_shortcut = QtGui.QShortcut(QtGui.QKeySequence('Ctrl+Z'), self)
         undo_shortcut.activated.connect(self.undo)
-        redo_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'), self)
+        redo_shortcut = QtGui.QShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'), self)
         redo_shortcut.activated.connect(self.redo)
+
+    def populate_input_devices(self):
+        """Заполняет список устройств записи"""
+        self.input_device_combo.clear()
+        try:
+            p = pyaudio.PyAudio()
+            for i in range(p.get_device_count()):
+                info = p.get_device_info_by_index(i)
+                if info['maxInputChannels'] > 0:  # Устройство поддерживает запись
+                    device_name = info['name']
+                    self.input_device_combo.addItem(f"{i}: {device_name}", i)
+            p.terminate()
+        except Exception as e:
+            print(f"Ошибка получения списка устройств записи: {e}")
+            self.input_device_combo.addItem("Ошибка загрузки устройств", -1)
+
+    def populate_output_devices(self):
+        """Заполняет список устройств воспроизведения"""
+        self.output_device_combo.clear()
+        try:
+            p = pyaudio.PyAudio()
+            for i in range(p.get_device_count()):
+                info = p.get_device_info_by_index(i)
+                if info['maxOutputChannels'] > 0:  # Устройство поддерживает воспроизведение
+                    device_name = info['name']
+                    self.output_device_combo.addItem(f"{i}: {device_name}", i)
+            p.terminate()
+        except Exception as e:
+            print(f"Ошибка получения списка устройств воспроизведения: {e}")
+            self.output_device_combo.addItem("Ошибка загрузки устройств", -1)
+
+    def refresh_devices(self):
+        """Обновляет списки всех устройств"""
+        # Сохраняем выбранные устройства
+        selected_input = self.get_selected_input_device()
+        selected_output = self.get_selected_output_device()
+        
+        # Обновляем списки
+        self.populate_input_devices()
+        self.populate_output_devices()
+        
+        # Восстанавливаем выбранные устройства, если они все еще доступны
+        if selected_input is not None and selected_input != -1:
+            for i in range(self.input_device_combo.count()):
+                if self.input_device_combo.itemData(i) == selected_input:
+                    self.input_device_combo.setCurrentIndex(i)
+                    break
+        
+        if selected_output is not None and selected_output != -1:
+            for i in range(self.output_device_combo.count()):
+                if self.output_device_combo.itemData(i) == selected_output:
+                    self.output_device_combo.setCurrentIndex(i)
+                    break
+
+    def get_selected_input_device(self):
+        """Возвращает индекс выбранного устройства записи"""
+        return self.input_device_combo.currentData()
+
+    def get_selected_output_device(self):
+        """Возвращает индекс выбранного устройства воспроизведения"""
+        return self.output_device_combo.currentData()
 
     def set_duration(self, val):
         self.duration = val
@@ -150,13 +237,13 @@ class AudioRecorderEditor(QtWidgets.QWidget):
 
     def eventFilter(self, obj, event):
         if obj is self.plot_widget.viewport():
-            if event.type() == QtCore.QEvent.MouseButtonPress and event.button() == QtCore.Qt.LeftButton:
+            if event.type() == QtCore.QEvent.Type.MouseButtonPress and event.button() == QtCore.Qt.MouseButton.LeftButton:
                 self._start_selection(event)
                 return True
-            elif event.type() == QtCore.QEvent.MouseMove and self.dragging:
+            elif event.type() == QtCore.QEvent.Type.MouseMove and self.dragging:
                 self._update_selection(event)
                 return True
-            elif event.type() == QtCore.QEvent.MouseButtonRelease and event.button() == QtCore.Qt.LeftButton:
+            elif event.type() == QtCore.QEvent.Type.MouseButtonRelease and event.button() == QtCore.Qt.MouseButton.LeftButton:
                 self._end_selection(event)
                 return True
         return super().eventFilter(obj, event)
@@ -191,7 +278,7 @@ class AudioRecorderEditor(QtWidgets.QWidget):
     def on_plot_mouse_click(self, event):
         if self.audio_data is None:
             return
-        if event.button() == QtCore.Qt.RightButton:
+        if event.button() == QtCore.Qt.MouseButton.RightButton:
             self.region.setVisible(False)
             self.selection = None
 
@@ -224,24 +311,53 @@ class AudioRecorderEditor(QtWidgets.QWidget):
 
     def _record_thread(self):
         p = pyaudio.PyAudio()
-        stream = p.open(format=pyaudio.paInt16, channels=1, rate=self.fs, input=True, frames_per_buffer=1024)
-        frames = []
-        for _ in range(0, int(self.fs / 1024 * self.duration)):
-            data = stream.read(1024)
-            frames.append(data)
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
-        self.audio_data = b''.join(frames)  # raw int16 без нормалізації
-        self.update_plot()
-        self.btn_save.setEnabled(True)
-        self.btn_play.setEnabled(True)
-        self.btn_play_eq.setEnabled(True)
-        self.btn_process.setEnabled(True)
-        self.history.clear()
-        self.redo_stack.clear()
-        self.btn_undo.setEnabled(False)
-        self.btn_redo.setEnabled(False)
+        input_device = self.get_selected_input_device()
+        if input_device is None or input_device == -1:
+            input_device = None  # Используем устройство по умолчанию
+        
+        try:
+            stream = p.open(
+                format=pyaudio.paInt16, 
+                channels=1, 
+                rate=self.fs, 
+                input=True, 
+                input_device_index=input_device,
+                frames_per_buffer=1024
+            )
+            frames = []
+            for _ in range(0, int(self.fs / 1024 * self.duration)):
+                data = stream.read(1024)
+                frames.append(data)
+            stream.stop_stream()
+            stream.close()
+        except Exception as e:
+            print(f"Ошибка записи с выбранным устройством: {e}")
+            # Пробуем с устройством по умолчанию
+            try:
+                stream = p.open(format=pyaudio.paInt16, channels=1, rate=self.fs, input=True, frames_per_buffer=1024)
+                frames = []
+                for _ in range(0, int(self.fs / 1024 * self.duration)):
+                    data = stream.read(1024)
+                    frames.append(data)
+                stream.stop_stream()
+                stream.close()
+            except Exception as e2:
+                print(f"Ошибка записи с устройством по умолчанию: {e2}")
+                frames = []
+        finally:
+            p.terminate()
+        
+        if frames:
+            self.audio_data = b''.join(frames)  # raw int16 без нормалізації
+            self.update_plot()
+            self.btn_save.setEnabled(True)
+            self.btn_play.setEnabled(True)
+            self.btn_play_eq.setEnabled(True)
+            self.btn_process.setEnabled(True)
+            self.history.clear()
+            self.redo_stack.clear()
+            self.btn_undo.setEnabled(False)
+            self.btn_redo.setEnabled(False)
 
     def stop_recording(self):
         self.is_recording = False
@@ -417,14 +533,32 @@ class AudioRecorderEditor(QtWidgets.QWidget):
     def _play_thread(self, play_data):
         try:
             p = pyaudio.PyAudio()
-            stream = p.open(format=pyaudio.paInt16, channels=1, rate=self.fs, output=True)
-            stream.write(play_data)
-            stream.stop_stream()
-            stream.close()
-            p.terminate()
+            output_device = self.get_selected_output_device()
+            if output_device is None or output_device == -1:
+                output_device = None  # Используем устройство по умолчанию
+            
+            try:
+                stream = p.open(
+                    format=pyaudio.paInt16, 
+                    channels=1, 
+                    rate=self.fs, 
+                    output=True,
+                    output_device_index=output_device
+                )
+                stream.write(play_data)
+                stream.stop_stream()
+                stream.close()
+            except Exception as e:
+                print(f"Ошибка воспроизведения с выбранным устройством: {e}")
+                # Пробуем с устройством по умолчанию
+                stream = p.open(format=pyaudio.paInt16, channels=1, rate=self.fs, output=True)
+                stream.write(play_data)
+                stream.stop_stream()
+                stream.close()
         except Exception as e:
             print(f"Помилка відтворення: {e}")
         finally:
+            p.terminate()
             # Переконуємося, що потік завершений
             self.play_thread = None
 
@@ -464,4 +598,4 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     win = AudioRecorderEditor()
     win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
