@@ -28,22 +28,22 @@ jobs:
     
     - name: Build EXE with PyInstaller
       run: |
-        pyinstaller --onefile --windowed --name "AudioEditor_v1.6" audio_recorder_editor.py
+        pyinstaller --onefile --windowed --name "AudioEditor_v1.0.6" audio_recorder_editor.py
     
     - name: Upload EXE artifacts
       uses: actions/upload-artifact@v4
       with:
         name: audio-editor-exe
-        path: dist/AudioEditor_v1.6.exe
+        path: dist/AudioEditor_v1.0.6.exe
 
     - name: Show EXE files info
       if: always()
       run: |
         echo "🎉 EXE файл зібрано успішно!"
         echo "📁 Файл знаходиться в артефактах:"
-        if (Test-Path "dist/AudioEditor_v1.6.exe") {
-        $size = (Get-Item "dist/AudioEditor_v1.6.exe").Length / 1MB
-        echo "   📄 AudioEditor_v1.6.exe ($([math]::Round($size, 1)) MB)"
+        if (Test-Path "dist/AudioEditor_v1.0.6.exe") {
+        $size = (Get-Item "dist/AudioEditor_v1.0.6.exe").Length / 1MB
+        echo "   📄 AudioEditor_v1.0.6.exe ($([math]::Round($size, 1)) MB)"
         }
         echo ""
         echo "💡 Для створення Release:"
@@ -55,15 +55,15 @@ jobs:
       if: github.event_name == 'push'
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v1.6
-        name: Audio Editor v1.6
+        tag_name: v1.0.6
+        name: Audio Editor v1.0.6
         body: |
-          🎵 **Аудіо Рекордер та Редактор v1.6**
+          🎵 **Аудіо Рекордер та Редактор v1.0.6**
           
           ## 📦 Що включено:
-          - **AudioEditor_v1.6.exe** - Графічна версія (PyQt6)
+          - **AudioEditor_v1.0.6.exe** - Графічна версія (PyQt6)
 
-          ## 🆕 Нові функції v1.6:
+          ## 🆕 Нові функції v1.0.6:
           - **🎛️ Вибір джерела запису** - вибір конкретного мікрофона
           - **🔊 Вибір джерела відтворення** - вибір колонок/навушників
           - **🔄 Оновлення пристроїв** - кнопка для оновлення списку аудіо пристроїв
@@ -75,6 +75,6 @@ jobs:
           3. Запустіть без встановлення Python
           4. Насолоджуйтесь роботою з аудіо!
 
-        files: dist/AudioEditor_v1.6.exe
+        files: dist/AudioEditor_v1.0.6.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

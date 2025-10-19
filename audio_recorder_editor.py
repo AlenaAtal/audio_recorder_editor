@@ -135,29 +135,29 @@ class AudioRecorderEditor(QtWidgets.QWidget):
         self.plot_widget.wheelEvent = self.on_wheel_event
         self.region.sigRegionChanged.connect(self.on_region_changed)
         
-        # Нижняя панель: выбор источников записи и воспроизведения
+        # Нижня панель: вибір джерел запису та відтворення
         bottom_layout = QtWidgets.QHBoxLayout()
         
-        # Выбор источника записи
+        # Вибір джерела запису
         bottom_layout.addWidget(QtWidgets.QLabel('Джерело запису:'))
         self.input_device_combo = QtWidgets.QComboBox()
         self.input_device_combo.setMinimumWidth(200)
         self.populate_input_devices()
         bottom_layout.addWidget(self.input_device_combo)
         
-        # Выбор источника воспроизведения
+        # Вибір джерела відтворення
         bottom_layout.addWidget(QtWidgets.QLabel('Джерело відтворення:'))
         self.output_device_combo = QtWidgets.QComboBox()
         self.output_device_combo.setMinimumWidth(200)
         self.populate_output_devices()
         bottom_layout.addWidget(self.output_device_combo)
         
-        # Кнопка обновления списка устройств
+        # Кнопка оновлення списку пристроїв
         self.btn_refresh_devices = QtWidgets.QPushButton('Оновити пристрої')
         self.btn_refresh_devices.clicked.connect(self.refresh_devices)
         bottom_layout.addWidget(self.btn_refresh_devices)
         
-        bottom_layout.addStretch()  # Растягиваем оставшееся пространство
+        bottom_layout.addStretch()  # Розтягуємо залишковий простір
         layout.addLayout(bottom_layout)
         
         self.setLayout(layout)
@@ -169,46 +169,46 @@ class AudioRecorderEditor(QtWidgets.QWidget):
         redo_shortcut.activated.connect(self.redo)
 
     def populate_input_devices(self):
-        """Заполняет список устройств записи"""
+        """Заповнює список пристроїв запису"""
         self.input_device_combo.clear()
         try:
             p = pyaudio.PyAudio()
             for i in range(p.get_device_count()):
                 info = p.get_device_info_by_index(i)
-                if info['maxInputChannels'] > 0:  # Устройство поддерживает запись
+                if info['maxInputChannels'] > 0:  # Пристрій підтримує запис
                     device_name = info['name']
                     self.input_device_combo.addItem(f"{i}: {device_name}", i)
             p.terminate()
         except Exception as e:
-            print(f"Ошибка получения списка устройств записи: {e}")
-            self.input_device_combo.addItem("Ошибка загрузки устройств", -1)
+            print(f"Помилка отримання списку пристроїв запису: {e}")
+            self.input_device_combo.addItem("Помилка завантаження пристроїв", -1)
 
     def populate_output_devices(self):
-        """Заполняет список устройств воспроизведения"""
+        """Заповнює список пристроїв відтворення"""
         self.output_device_combo.clear()
         try:
             p = pyaudio.PyAudio()
             for i in range(p.get_device_count()):
                 info = p.get_device_info_by_index(i)
-                if info['maxOutputChannels'] > 0:  # Устройство поддерживает воспроизведение
+                if info['maxOutputChannels'] > 0:  # Пристрій підтримує відтворення
                     device_name = info['name']
                     self.output_device_combo.addItem(f"{i}: {device_name}", i)
             p.terminate()
         except Exception as e:
-            print(f"Ошибка получения списка устройств воспроизведения: {e}")
-            self.output_device_combo.addItem("Ошибка загрузки устройств", -1)
+            print(f"Помилка отримання списку пристроїв відтворення: {e}")
+            self.output_device_combo.addItem("Помилка завантаження пристроїв", -1)
 
     def refresh_devices(self):
-        """Обновляет списки всех устройств"""
-        # Сохраняем выбранные устройства
+        """Оновлює списки всіх пристроїв"""
+        # Зберігаємо вибрані пристрої
         selected_input = self.get_selected_input_device()
         selected_output = self.get_selected_output_device()
         
-        # Обновляем списки
+        # Оновлюємо списки
         self.populate_input_devices()
         self.populate_output_devices()
         
-        # Восстанавливаем выбранные устройства, если они все еще доступны
+        # Відновлюємо вибрані пристрої, якщо вони все ще доступні
         if selected_input is not None and selected_input != -1:
             for i in range(self.input_device_combo.count()):
                 if self.input_device_combo.itemData(i) == selected_input:
@@ -222,11 +222,11 @@ class AudioRecorderEditor(QtWidgets.QWidget):
                     break
 
     def get_selected_input_device(self):
-        """Возвращает индекс выбранного устройства записи"""
+        """Повертає індекс вибраного пристрою запису"""
         return self.input_device_combo.currentData()
 
     def get_selected_output_device(self):
-        """Возвращает индекс выбранного устройства воспроизведения"""
+        """Повертає індекс вибраного пристрою відтворення"""
         return self.output_device_combo.currentData()
 
     def set_duration(self, val):
@@ -313,7 +313,7 @@ class AudioRecorderEditor(QtWidgets.QWidget):
         p = pyaudio.PyAudio()
         input_device = self.get_selected_input_device()
         if input_device is None or input_device == -1:
-            input_device = None  # Используем устройство по умолчанию
+            input_device = None  # Використовуємо пристрій за замовчуванням
         
         try:
             stream = p.open(
@@ -331,8 +331,8 @@ class AudioRecorderEditor(QtWidgets.QWidget):
             stream.stop_stream()
             stream.close()
         except Exception as e:
-            print(f"Ошибка записи с выбранным устройством: {e}")
-            # Пробуем с устройством по умолчанию
+            print(f"Помилка запису з вибраним пристроєм: {e}")
+            # Пробуємо з пристроєм за замовчуванням
             try:
                 stream = p.open(format=pyaudio.paInt16, channels=1, rate=self.fs, input=True, frames_per_buffer=1024)
                 frames = []
@@ -342,7 +342,7 @@ class AudioRecorderEditor(QtWidgets.QWidget):
                 stream.stop_stream()
                 stream.close()
             except Exception as e2:
-                print(f"Ошибка записи с устройством по умолчанию: {e2}")
+                print(f"Помилка запису з пристроєм за замовчуванням: {e2}")
                 frames = []
         finally:
             p.terminate()
@@ -535,7 +535,7 @@ class AudioRecorderEditor(QtWidgets.QWidget):
             p = pyaudio.PyAudio()
             output_device = self.get_selected_output_device()
             if output_device is None or output_device == -1:
-                output_device = None  # Используем устройство по умолчанию
+                output_device = None  # Використовуємо пристрій за замовчуванням
             
             try:
                 stream = p.open(
@@ -549,8 +549,8 @@ class AudioRecorderEditor(QtWidgets.QWidget):
                 stream.stop_stream()
                 stream.close()
             except Exception as e:
-                print(f"Ошибка воспроизведения с выбранным устройством: {e}")
-                # Пробуем с устройством по умолчанию
+                print(f"Помилка відтворення з вибраним пристроєм: {e}")
+                # Пробуємо з пристроєм за замовчуванням
                 stream = p.open(format=pyaudio.paInt16, channels=1, rate=self.fs, output=True)
                 stream.write(play_data)
                 stream.stop_stream()
